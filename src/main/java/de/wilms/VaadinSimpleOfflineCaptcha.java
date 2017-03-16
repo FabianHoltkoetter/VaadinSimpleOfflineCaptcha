@@ -5,6 +5,8 @@ import com.sun.speech.freetts.VoiceManager;
 import com.sun.speech.freetts.audio.SingleFileAudioPlayer;
 import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.FileResource;
+import com.vaadin.server.Page;
+import com.vaadin.server.UserError;
 import com.vaadin.ui.*;
 import com.vaadin.ui.Button;
 import com.vaadin.ui.Component;
@@ -76,6 +78,11 @@ public class VaadinSimpleOfflineCaptcha extends CustomField<Boolean> {
     private Audio audio = new Audio();
 
     /**
+     * Plays the audio for color blind users.
+     */
+    private Button audioPlay = new Button();
+
+    /**
      * Input for the solution
      */
     private TextField textField = new TextField();
@@ -113,14 +120,19 @@ public class VaadinSimpleOfflineCaptcha extends CustomField<Boolean> {
 
         textField.setPlaceholder("Lösung");
 
-        refresh.setIcon(VaadinIcons.REFRESH);
-        refresh.addClickListener(clickEvent -> {
-            createNewCaptcha();
-        });
+        Page.Styles styles = Page.getCurrent().getStyles();
+        styles.add(".audioplayerinvisible {display:none;}");
 
-        HorizontalLayout components = new HorizontalLayout(image, audio, textField, refresh);
+        audio.addStyleName("audioplayerinvisible");
+
+        audioPlay.setIcon(VaadinIcons.PLAY);
+        audioPlay.addClickListener(clickEvent -> Page.getCurrent().getJavaScript().execute("document.getElementsByClassName(\"audioplayerinvisible\")[0].play();"));
+
+        refresh.setIcon(VaadinIcons.REFRESH);
+        refresh.addClickListener(clickEvent -> createNewCaptcha());
+
+        HorizontalLayout components = new HorizontalLayout(image, audio, audioPlay, textField, refresh);
         components.setComponentAlignment(image, Alignment.MIDDLE_CENTER);
-        components.setComponentAlignment(audio, Alignment.TOP_CENTER);
         return components;
     }
 
@@ -159,12 +171,22 @@ public class VaadinSimpleOfflineCaptcha extends CustomField<Boolean> {
      */
     @Override
     public Boolean getValue() {
-        Double aDouble = Double.valueOf(textField.getValue());
-        boolean result = aDouble == solution;
-        if(!result){
+        String value = textField.getValue();
+        try {
+            Double aDouble = Double.valueOf(value);
+            if (aDouble != solution) {
+                createNewCaptcha();
+                textField.setComponentError(new UserError("Das war leider nicht richtig."));
+                return false;
+            } else {
+                textField.setComponentError(null);
+                return true;
+            }
+        } catch(NumberFormatException e) {
+            textField.setComponentError(new UserError("Hier sind nur zahlen erlaubt."));
             createNewCaptcha();
+            return false;
         }
-        return result;
     }
 
     /**
