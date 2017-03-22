@@ -14,6 +14,7 @@ import javax.servlet.annotation.WebServlet;
 /**
  * Demo Application to showcase the VaadinSimpleOfflineCaptcha
  */
+@Theme("valo")
 public class MyUI extends UI {
 
     @Override
@@ -28,7 +29,8 @@ public class MyUI extends UI {
         button.addClickListener( e -> l.setValue("Captcha was " + (vaadinSimpleOfflineCaptcha.getValue()? "solved! :)" : "not solved! :(")));
 
         layout.addComponents(vaadinSimpleOfflineCaptcha, button, l);
-        
+
+        layout.setSpacing(true);
         setContent(layout);
     }
 

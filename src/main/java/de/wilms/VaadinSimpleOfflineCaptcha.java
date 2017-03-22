@@ -3,8 +3,8 @@ package de.wilms;
 import com.sun.speech.freetts.FreeTTS;
 import com.sun.speech.freetts.VoiceManager;
 import com.sun.speech.freetts.audio.SingleFileAudioPlayer;
-import com.vaadin.icons.VaadinIcons;
 import com.vaadin.server.FileResource;
+import com.vaadin.server.FontAwesome;
 import com.vaadin.server.Page;
 import com.vaadin.server.UserError;
 import com.vaadin.ui.*;
@@ -118,20 +118,21 @@ public class VaadinSimpleOfflineCaptcha extends CustomField<Boolean> {
 
         createNewCaptcha();
 
-        textField.setPlaceholder("Lösung");
+        textField.setInputPrompt("Lösung");
 
         Page.Styles styles = Page.getCurrent().getStyles();
-        styles.add(".audioplayerinvisible {display:none;}");
+        styles.add(".audioplayerinvisible {display:none !important;}");
 
         audio.addStyleName("audioplayerinvisible");
 
-        audioPlay.setIcon(VaadinIcons.PLAY);
+        audioPlay.setIcon(FontAwesome.PLAY);
         audioPlay.addClickListener(clickEvent -> Page.getCurrent().getJavaScript().execute("document.getElementsByClassName(\"audioplayerinvisible\")[0].play();"));
 
-        refresh.setIcon(VaadinIcons.REFRESH);
+        refresh.setIcon(FontAwesome.REFRESH);
         refresh.addClickListener(clickEvent -> createNewCaptcha());
 
         HorizontalLayout components = new HorizontalLayout(image, audio, audioPlay, textField, refresh);
+        components.setSpacing(true);
         components.setComponentAlignment(image, Alignment.MIDDLE_CENTER);
         return components;
     }
@@ -293,13 +294,6 @@ public class VaadinSimpleOfflineCaptcha extends CustomField<Boolean> {
     public Class<? extends Boolean> getType() {
         return boolean.class;
     }
-
-    /**
-     * Obviously you can't set a value here...
-     * @param aBoolean
-     */
-    @Override
-    protected void doSetValue(Boolean aBoolean) {}
 
     /**
      * Deletes all files created in this UI session.
